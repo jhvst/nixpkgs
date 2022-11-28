@@ -3,10 +3,11 @@
 , fetchurl
 , gmp
 , libX11
+, libpthreadstubs
 , perl
 , readline
 , tex
-, withThread ? true, libpthreadstubs
+, withThread ? true
 }:
 
 assert withThread -> libpthreadstubs != null;
@@ -39,7 +40,7 @@ stdenv.mkDerivation rec {
     "--with-gmp=${lib.getDev gmp}"
     "--with-readline=${lib.getDev readline}"
   ]
-  ++ lib.optional stdenv.isDarwin "--host=x86_64-darwin"
+  ++ lib.optional stdenv.isDarwin "--host=${stdenv.system}"
   ++ lib.optional withThread "--mt=pthread";
 
   preConfigure = ''
@@ -47,7 +48,7 @@ stdenv.mkDerivation rec {
   '';
 
   postConfigure = lib.optionalString stdenv.isDarwin ''
-    echo 'echo x86_64-darwin' > config/arch-osname
+    echo 'echo ${stdenv.system}' > config/arch-osname
   '';
 
   makeFlags = [ "all" ];
@@ -80,9 +81,8 @@ stdenv.mkDerivation rec {
     '';
     downloadPage = "http://pari.math.u-bordeaux.fr/download.html";
     license = licenses.gpl2Plus;
-    maintainers = with maintainers; [ ertes AndersonTorres ] ++ teams.sage.members;
+    maintainers = with maintainers; [ ertes ] ++ teams.sage.members;
     platforms = platforms.linux ++ platforms.darwin;
-    broken = stdenv.isDarwin && stdenv.isAarch64;
     mainProgram = "gp";
   };
 }

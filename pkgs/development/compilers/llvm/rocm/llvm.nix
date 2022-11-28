@@ -9,6 +9,7 @@
 , libxml2
 , libffi
 , libbfd
+, libxcrypt
 , ncurses
 , zlib
 , debugVersion ? false
@@ -23,7 +24,7 @@ let
     if stdenv.isx86_64 then "X86"
     else if stdenv.isAarch64 then "AArch64"
     else throw "Unsupported ROCm LLVM platform";
-in stdenv.mkDerivation rec {
+in stdenv.mkDerivation (finalAttrs: {
   inherit src version;
 
   pname = "rocm-llvm";
@@ -32,7 +33,7 @@ in stdenv.mkDerivation rec {
 
   nativeBuildInputs = [ cmake ninja python3 ];
 
-  buildInputs = [ libxml2 ];
+  buildInputs = [ libxml2 libxcrypt ];
 
   propagatedBuildInputs = [ ncurses zlib ];
 
@@ -40,7 +41,7 @@ in stdenv.mkDerivation rec {
     "-DCMAKE_BUILD_TYPE=${if debugVersion then "Debug" else "Release"}"
     "-DLLVM_INSTALL_UTILS=ON" # Needed by rustc
     "-DLLVM_TARGETS_TO_BUILD=AMDGPU;${llvmNativeTarget}"
-    "-DLLVM_ENABLE_PROJECTS=clang;lld;compiler-rt"
+    "-DLLVM_ENABLE_PROJECTS=clang;lld;compiler-rt;clang-tools-extra"
   ]
   ++ lib.optionals enableManpages [
     "-DLLVM_BINUTILS_INCDIR=${libbfd.dev}/include"
@@ -84,7 +85,7 @@ in stdenv.mkDerivation rec {
     description = "ROCm fork of the LLVM compiler infrastructure";
     homepage = "https://github.com/RadeonOpenCompute/llvm-project";
     license = with licenses; [ ncsa ];
-    maintainers = with maintainers; [ acowley lovesegfault Flakebi ];
+    maintainers = with maintainers; [ acowley lovesegfault ] ++ teams.rocm.members;
     platforms = platforms.linux;
   };
-}
+})
