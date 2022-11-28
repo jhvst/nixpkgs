@@ -292,7 +292,10 @@ checkFS() {
     if [ "$fsType" = nilfs2 ]; then return 0; fi
 
     # Skip fsck for inherently readonly filesystems.
-    if [ "$fsType" = squashfs ]; then return 0; fi
+    if [ "$fsType" = squashfs ]; then
+        losetup "$device"
+        return 0
+    fi
 
     # If we couldn't figure out the FS type, then skip fsck.
     if [ "$fsType" = auto ]; then
