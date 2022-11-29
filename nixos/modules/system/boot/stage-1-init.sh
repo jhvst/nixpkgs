@@ -214,6 +214,10 @@ for o in $(cat /proc/cmdline); do
             fi
             ln -s "$root" /dev/root
             ;;
+        rootfs=*)
+            set -- $(IFS==; echo $o)
+            wget -O nix-store.squashfs $2
+            ;;
         copytoram)
             copytoram=1
             ;;
@@ -292,10 +296,7 @@ checkFS() {
     if [ "$fsType" = nilfs2 ]; then return 0; fi
 
     # Skip fsck for inherently readonly filesystems.
-    if [ "$fsType" = squashfs ]; then
-        losetup "$device"
-        return 0
-    fi
+    if [ "$fsType" = squashfs ]; then return 0; fi
 
     # If we couldn't figure out the FS type, then skip fsck.
     if [ "$fsType" = auto ]; then
