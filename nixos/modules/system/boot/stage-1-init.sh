@@ -216,9 +216,7 @@ for o in $(cat /proc/cmdline); do
             ;;
         rootfs=*)
             set -- $(IFS==; echo $o)
-            echo $1
-            echo $2
-	    echo $3
+            echo "nameserver 1.1.1.1" >> /etc/resolv.conf
             wget -O nix-store.squashfs $2
             ;;
         copytoram)
