@@ -216,6 +216,9 @@ for o in $(cat /proc/cmdline); do
             ;;
         rootfs=*)
             set -- $(IFS==; echo $o)
+            echo $1
+            echo $2
+	    echo $3
             wget -O nix-store.squashfs $2
             ;;
         copytoram)
